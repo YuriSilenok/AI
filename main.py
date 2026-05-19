@@ -36,11 +36,11 @@ try:
 
     while True:
         try:
-            driver.get("https://github.com/pulls/review-requested")
             links = [pr_link.get_attribute("href") for pr_link in driver.find_elements(By.XPATH, '//a[@data-hovercard-type="pull_request"]')]
             for pr_url in links:
             
                 driver.get(pr_url)
+                time.sleep(15)
                 print(pr_url)
                 driver.find_element(By.XPATH, '//a[@id="prs-files-anchor-tab"]').click()
                 # time.sleep(3)
@@ -71,20 +71,24 @@ try:
                     textarea.send_keys(line + (Keys.SHIFT + Keys.ENTER))
 
                 textarea.send_keys(Keys.ENTER)
+                print('Промт отправлен')
                 time.sleep(60)
                 driver.find_element(By.XPATH, '(//button[@data-da_name="MessageCopyButton"])[last()]').click()
                 time.sleep(3)
                 driver.get(pr_url)
+                time.sleep(15)
                 driver.find_element(By.XPATH, '//a[@id="prs-files-anchor-tab"]').click()
                 driver.find_element(By.XPATH, '//button[.//span[contains(., "Submit")]]').click()
                 driver.find_element(By.XPATH, '//textarea[@placeholder="Leave a comment"]').send_keys(pyperclip.paste())
                 driver.find_element(By.XPATH, '(//div[button[.//span[.="Cancel"]]]//button)[2]').click()
+                print('Проверка отправлена')
                 time.sleep(30)
 
 
         except Exception as ex:
             print(pr_url, '\n', traceback.format_exc())
         # break
+        driver.get("https://github.com/pulls/review-requested")
         time.sleep(60)
     
 finally:
