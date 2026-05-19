@@ -15,6 +15,16 @@ options = Options()
 # options.page_load_strategy = "eager"
 driver = webdriver.Chrome(service=service, options=options)
 
+def send_review(pr_url: str, text: str):
+    driver.get(pr_url)
+    time.sleep(15)
+    driver.find_element(By.XPATH, '//a[@id="prs-files-anchor-tab"]').click()
+    driver.find_element(By.XPATH, '//button[.//span[contains(., "Submit")]]').click()
+    driver.find_element(By.XPATH, '//textarea[@placeholder="Leave a comment"]').send_keys(text)
+    driver.find_element(By.XPATH, '(//div[button[.//span[.="Cancel"]]]//button)[2]').click()
+    print('Проверка отправлена')
+
+
 try:
     driver.maximize_window()
     driver.implicitly_wait(30)
@@ -37,6 +47,10 @@ try:
     while True:
         try:
             links = [pr_link.get_attribute("href") for pr_link in driver.find_elements(By.XPATH, '//a[@data-hovercard-type="pull_request"]')]
+            
+            if not links:
+                break
+            
             for pr_url in links:
             
                 driver.get(pr_url)
@@ -47,7 +61,7 @@ try:
                 try:
                     doc_md = driver.find_element(By.XPATH, '//a[.="doc.md"]')
                 except Exception as ex:
-                    print(pr_url, 'файл doc.md не найден')
+                    send_review(pr_url, 'файл doc.md не найден')
                     continue
                 repo = driver.find_element(By.XPATH, '(//a[contains(@class, "PullRequestBranchName")])[2]').get_attribute('href').replace('tree', 'refs/heads').replace('github', 'raw.githubusercontent')
                 folder = driver.find_element(By.XPATH, '//span[contains(@class, "PRIVATE_TreeView-item-content-text")]/span').text
@@ -75,13 +89,7 @@ try:
                 time.sleep(60)
                 driver.find_element(By.XPATH, '(//button[@data-da_name="MessageCopyButton"])[last()]').click()
                 time.sleep(3)
-                driver.get(pr_url)
-                time.sleep(15)
-                driver.find_element(By.XPATH, '//a[@id="prs-files-anchor-tab"]').click()
-                driver.find_element(By.XPATH, '//button[.//span[contains(., "Submit")]]').click()
-                driver.find_element(By.XPATH, '//textarea[@placeholder="Leave a comment"]').send_keys(pyperclip.paste())
-                driver.find_element(By.XPATH, '(//div[button[.//span[.="Cancel"]]]//button)[2]').click()
-                print('Проверка отправлена')
+                send_review(pr_url, pyperclip.paste())
                 time.sleep(30)
 
 
