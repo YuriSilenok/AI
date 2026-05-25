@@ -1,52 +1,8 @@
-# Список тем (сервисов)
-
-- Auth Service (Сервис аутентификации)
-- Profile Service (Сервис профилей)
-- Role Service (Сервис ролей)
-- Permission Service (Сервис разрешений)
-- Faculty Service (Сервис факультетов/отделений)
-- Specialty Service (Сервис специальностей)
-- Group Service (Сервис групп)
-- Subgroup Service (Сервис подгрупп)
-- Student Movement Service (Сервис движения студентов)
-- Employee Status Service (Сервис статуса сотрудника)
-- Discipline Service (Сервис дисциплин)
-- Curriculum Plan Service (Сервис учебного плана)
-- Work Program Service (Сервис рабочих программ)
-- Load Calculation Service (Сервис расчета нагрузки)
-- Load Assignment Service (Сервис распределения нагрузки)
-- Campus Service (Сервис корпусов)
-- Room Service (Сервис аудиторий)
-- Room Equipment Service (Сервис оборудования)
-- Resource Pool Service (Сервис пула ресурсов)
-- Academic Period Service (Сервис учебных периодов)
-- Holiday Service (Сервис каникул и праздников)
-- Timeslot Service (Сервис временных слотов)
-- Teacher Availability Service (Сервис доступности преподавателя)
-- Room Availability Service (Сервис занятости аудиторий)
-- Scheduler Orchestrator Service (Оркестратор расписания)
-- Constraint Validation Service (Сервис валидации ограничений)
-- Soft Constraint Service (Сервис мягких ограничений)
-- Allocation Service (Сервис распределения)
-- Schedule Storage Service (Хранилище расписания)
-- Replacement Request Service (Сервис заявок на замену)
-- Replacement Match Service (Сервис подбора замены)
-- Substitution Service (Сервис фиксации замен)
-- Schedule Change Log Service (Сервис лога изменений)
-- Cancellation Service (Сервис отмен занятий)
-- Personal Schedule Service (Сервис персонального расписания)
-- Notification Sender Service (Сервис отправки уведомлений)
-- Email Gateway (Шлюз email)
-- Push Gateway (Шлюз push-уведомлений)
-- Export Service (Сервис экспорта)
-- API Gateway (Шлюз API)
-- Teacher Load Report Service (Сервис отчетов по нагрузке преподавателей)
-- Classroom Usage Analytics (Аналитика использования аудиторий)
-- Schedule Quality Service (Сервис качества расписания)
-
-# Требования к содержимому отчета
+# Требования к содержимому doc.md
 
 ## Номер варианта и название сервиса
+
+Важно, Ваш сервис не должен хранить сведения, которые точно будут храниться в других сервисах.
 
 ## Добавить `<сущность>`
 
@@ -113,13 +69,8 @@
 
 ![ER-диаграмма](erd.png)
 
-
+Твоя задача проверить только что содержимое doc.md соответсвует требованиям.
+Если есть замечания, коротко напиши их, если замечаний нет, напиши "Замечаний нет".
 Ниже написано содержимое файла doc.md.
-Твоя задача проверидь документацию написанную ниже на предмет несоотвесвия требованиям описанных выше и найти противоречия в документации ниже,
-а так же проверь, что в представленной ниже документации сохраняется только та информация, которая относится к предсталенному сервивису.
-Проверь дополнительно что:
-- поле is_active при создании сущности не передается и оно должно возвращаться в ответе, кроме сервисов: Auth Service (Сервис аутентификации), Profile Service (Сервис профилей), Role Service (Сервис ролей), Permission Service (Сервис разрешений)
 
-В ответе ты должна написать либо "Всё соответствует требованиям", либо те замечания, которые ты нашла. 
-Если всё соответсвует требованиям, тебе запрещается использовать слово "есть".
 
