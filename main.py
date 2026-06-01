@@ -37,7 +37,7 @@ def wait_element(xpath: str):
 
 def send_promt(promt:str):
     print(f"\n\n{promt}\n\n")
-    driver.get("https://giga.chat/")
+    driver.get("https://chat.deepseek.com/")
     time.sleep(delay)
     textarea = wait_element('//textarea')
     textarea.click()
@@ -77,12 +77,23 @@ try:
     driver.find_element(By.XPATH, '//input[@value="Sign in"]').click()
     driver.find_element(By.XPATH, '//button[@data-disable-with="More options…"]').click()
     driver.find_element(By.XPATH, '//span/span/span[.="GitHub Mobile"]').click()
+    time.sleep(delay)
     
     wait_element('//a[@title="Pull requests requesting your review"]')
 
+    driver.get("https://chat.deepseek.com/sign_in")
+    driver.find_element(By.XPATH, '//input[@placeholder="Номер телефона / адрес электронной почты"]').send_keys('yuri.silenok@gmail.com')
+    driver.find_element(By.XPATH, '//input[@placeholder="Пароль"]').send_keys('a2195966')
+    driver.find_element(By.XPATH, '//div[span[.="Войти"]]').click()
+    time.sleep(delay)
+
+
     wait = 30
     while True:
-           
+        
+        driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
+        time.sleep(delay)
+
         links = [pr_link.get_attribute("href") for pr_link in driver.find_elements(By.XPATH, '//a[@data-hovercard-type="pull_request"]')]
         if links:
             pr_url = links[0]
@@ -193,9 +204,6 @@ try:
         wait += 1
         print('wait', wait)
         time.sleep(wait)
-        driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
-        time.sleep(delay)
-        wait_element('//a[@title="Pull requests requesting your review"]').click()
     
 finally:
     driver.quit()
