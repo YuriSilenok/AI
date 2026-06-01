@@ -36,6 +36,7 @@ def wait_element(xpath: str):
 
 
 def send_promt(promt:str):
+    print(f"\n\n{promt}\n\n")
     driver.get("https://giga.chat/")
     time.sleep(delay)
     textarea = wait_element('//textarea')
@@ -63,12 +64,13 @@ def send_review(pr_url: str, text: str):
     driver.find_element(By.XPATH, '(//div[button[.//span[.="Cancel"]]]//button)[2]').click()
     wait_element('//button[@data-comment-text="Close with comment"]')
     print('Проверка отправлена')
+    time.sleep(delay*2)
 
 try:
     driver.maximize_window()
     driver.implicitly_wait(30)
     
-    driver.get("https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fpulls%2Freview-requested")
+    driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
     time.sleep(delay)
     driver.find_element(By.XPATH, '//input[@id="login_field"]').send_keys('YuriSilenok')
     driver.find_element(By.XPATH, '//input[@id="password"]').send_keys('a1501274296')
@@ -82,8 +84,8 @@ try:
     while True:
            
         links = [pr_link.get_attribute("href") for pr_link in driver.find_elements(By.XPATH, '//a[@data-hovercard-type="pull_request"]')]
-        
-        for pr_url in links:
+        if links:
+            pr_url = links[0]
             wait //= 2
 
             try:
@@ -148,6 +150,10 @@ try:
                 # проверка service.py
                 if doc_md and models_py:
                     try:
+                        driver.get(pr_url)
+                        time.sleep(delay)
+                        wait_element('//a[@id="prs-files-anchor-tab"]').click()
+
                         driver.find_element(By.XPATH, '//a[.="service.py"]')
                         print(repo_url_service_py)
                         driver.get(repo_url_service_py)
@@ -162,6 +168,11 @@ try:
                 # проверка client.py
                 if doc_md and models_py and service_py:
                     try:
+
+                        driver.get(pr_url)
+                        time.sleep(delay)
+                        wait_element('//a[@id="prs-files-anchor-tab"]').click()
+
                         driver.find_element(By.XPATH, '//a[.="client.py"]')
                         print(repo_url_service_py)
                         driver.get(repo_url_service_py)
@@ -182,7 +193,7 @@ try:
         wait += 1
         print('wait', wait)
         time.sleep(wait)
-        driver.get("https://github.com/pulls/review-requested")
+        driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
         time.sleep(delay)
         wait_element('//a[@title="Pull requests requesting your review"]').click()
     
