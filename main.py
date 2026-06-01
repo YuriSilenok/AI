@@ -35,18 +35,26 @@ def wait_element(xpath: str):
                 print(f'Элемент не найден {xpath}')
 
 
-def send_promt(promt:str):
-    print(f"\n\n{promt}\n\n")
-    driver.get("https://chat.deepseek.com/")
+def send_promt(promts:tuple[str]):
+    # driver.get("https://giga.chat")
+    driver.get("https://alice.yandex.ru/")
     time.sleep(delay)
-    textarea = wait_element('//textarea')
-    textarea.click()
-    pyperclip.copy(promt)
-    textarea.send_keys(Keys.CONTROL + 'v')
-    textarea.send_keys(Keys.ENTER)
-    print('Промт отправлен')
-    wait_element('//button[contains(@class, "ActionMessageButton")]')
-    wait_element('(//button[@data-da_name="MessageCopyButton"])[last()]').click()
+    for promt in promts:
+        textarea = wait_element('//textarea')
+        textarea.click()
+        print(f"\n\n{promt}\n\n")
+        pyperclip.copy(promt)
+        textarea.send_keys(Keys.CONTROL + 'v')
+        textarea.send_keys(Keys.ENTER)
+        print('Промт отправлен')
+        time.sleep(delay)
+        # wait_element('//button[@id="call-button"]')
+        wait_element('//button[@id="oknyx-button" and @aria-label="Алиса, начни слушать"]')
+        
+    # wait_element('(//button[@data-da_name="MessageCopyButton"])[last()]').click()
+    
+    wait_element('(//button[@aria-label="Копировать"])[last()]').send_keys(Keys.END)
+    wait_element('(//button[@aria-label="Копировать"])[last()]').click()
     time.sleep(delay)
     print('Ответ на промт получен')
     return pyperclip.paste()
@@ -81,11 +89,11 @@ try:
     
     wait_element('//a[@title="Pull requests requesting your review"]')
 
-    driver.get("https://chat.deepseek.com/sign_in")
-    driver.find_element(By.XPATH, '//input[@placeholder="Номер телефона / адрес электронной почты"]').send_keys('yuri.silenok@gmail.com')
-    driver.find_element(By.XPATH, '//input[@placeholder="Пароль"]').send_keys('a2195966')
-    driver.find_element(By.XPATH, '//div[span[.="Войти"]]').click()
-    time.sleep(delay)
+    # driver.get("https://chat.deepseek.com/sign_in")
+    # driver.find_element(By.XPATH, '//input[@placeholder="Номер телефона / адрес электронной почты"]').send_keys('yuri.silenok@gmail.com')
+    # driver.find_element(By.XPATH, '//input[@placeholder="Пароль"]').send_keys('a2195966')
+    # driver.find_element(By.XPATH, '//div[span[.="Войти"]]').click()
+    # time.sleep(delay)
 
 
     wait = 30
@@ -133,7 +141,7 @@ try:
                     with open(file='promt.txt', mode='r', encoding='utf-8') as f:
                         promt = ''.join(f.readlines())
                     promt += doc_md
-                    review += f'\n\n---\n\n# Проверка doc.md\n\n{send_promt(promt)}'
+                    review += f'\n\n---\n\n# Проверка doc.md\n\n{send_promt((promt,))}'
                 except Exception as ex:
                     print(traceback.format_exc())
                     review += "\n\n---\n\nфайл doc.md не найден"
@@ -152,7 +160,7 @@ try:
                         time.sleep(delay)
                         models_py = driver.find_element(By.XPATH,  '//pre').text
                         promt = f'Проверь соотвесвие реализации models.py по требованиям из doc.md\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}\n\nЕсли есть замечания, коротко напиши их, если замечаний нет, напиши "Замечаний нет"'
-                        review += f'\n\n---\n\n# Проверка models.py\n\n{send_promt(promt)}'
+                        review += f'\n\n---\n\n# Проверка models.py\n\n{send_promt((promt,))}'
                     except Exception as ex:
                         print(traceback.format_exc())
                         review += "\n\n---\n\nфайл models.py не найден"
@@ -171,7 +179,11 @@ try:
                         time.sleep(delay)
                         service_py = driver.find_element(By.XPATH,  '//pre').text
                         promt = f'Проверь соотвесвие реализации service.py по требованиям из doc.md с учётом models.py\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}\n\nФайл `service.py`\n\n{service_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
-                        review += f'\n\n---\n\n# Проверка service.py\n\n{send_promt(promt)}'
+                        result = send_promt((
+                            f'Прочитай и запомни два этих файла:\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}',
+                            f'Проверь соотвесвие реализации service.py по требованиям из doc.md с учётом models.py\n\nФайл `service.py`\n\n{service_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
+                        ))
+                        review += f'\n\n---\n\n# Проверка service.py\n\n{result}'
                     except Exception as ex:
                         print(traceback.format_exc())
                         review += "\n\n---\n\nфайл service.py не найден"
@@ -189,8 +201,11 @@ try:
                         driver.get(repo_url_service_py)
                         time.sleep(delay)
                         client_py = driver.find_element(By.XPATH,  '//pre').text
-                        promt = f'Проверь соотвесвие реализации client_py.py по требованиям из doc.md с учётом service.py\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `service.py`\n\n{service_py}\n\nФайл `client.py`\n\n{client_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
-                        review += f'\n\n---\n\n# Проверка client.py\n\n{send_promt(promt)}'
+                        result = send_promt((
+                            f'Прочитай и запомни два этих файла:\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `service.py`\n\n{service_py}',
+                            f'Проверь соотвесвие реализации client.py по требованиям из doc.md с учётом service.py\n\nФайл `client.py`\n\n{client_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
+                        ))
+                        review += f'\n\n---\n\n# Проверка client.py\n\n{result}'
                     except Exception as ex:
                         print(traceback.format_exc())
                         review += "\n\n---\n\nфайл client.py не найден"
