@@ -42,7 +42,7 @@ def send_promt(promts:tuple[str]):
     for promt in promts:
         textarea = wait_element('//textarea')
         textarea.click()
-        print(f"\n\n{promt}\n\n")
+        # print(f"\n\n{promt}\n\n")
         pyperclip.copy(promt)
         textarea.send_keys(Keys.CONTROL + 'v')
         textarea.send_keys(Keys.ENTER)
@@ -146,6 +146,7 @@ try:
                     print(traceback.format_exc())
                     review += "\n\n---\n\nфайл doc.md не найден"
                             
+                print(review)
 
                 # проверка models.py
                 if doc_md:
@@ -165,6 +166,7 @@ try:
                         print(traceback.format_exc())
                         review += "\n\n---\n\nфайл models.py не найден"
 
+                    print(review)
 
                 # проверка service.py
                 if doc_md and models_py:
@@ -188,6 +190,9 @@ try:
                         print(traceback.format_exc())
                         review += "\n\n---\n\nфайл service.py не найден"
 
+
+                    print(review)
+
                 # проверка client.py
                 if doc_md and models_py and service_py:
                     try:
@@ -209,6 +214,7 @@ try:
                     except Exception as ex:
                         print(traceback.format_exc())
                         review += "\n\n---\n\nфайл client.py не найден"
+                    print(review)
 
                 send_review(pr_url, review)
 
