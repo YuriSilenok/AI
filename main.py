@@ -224,7 +224,7 @@ try:
             except Exception as ex:
                 print(pr_url, '\n', traceback.format_exc())
 
-        wait += 1
+        wait += 10
         print('wait', wait)
         time.sleep(wait)
     
