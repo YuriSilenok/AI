@@ -15,17 +15,25 @@ service_py = Service(ChromeDriverManager().install())
 options = Options()
 # options.page_load_strategy = "eager"
 driver = webdriver.Chrome(service=service_py, options=options)
+driver.maximize_window()
+driver.implicitly_wait(5)
 delay = 2
 
 start_message = (
+    '# Проверьте требования, они были переписаны так, что бы ваши нейросети их понимали!!!\n\n'
+    '## Если вы считаете требования противоречивыми, напишите об этом.\n\n'
     'Это отзыв ИИ которая проверяет только соответсвие `Требованиями к УП`. '
     'Если у ИИ есть какие-то замечания, то это не значит что так и есть. '
     'Вы должны убедиться что в этом месте у Вас написано верно, это поможет вам сократить время ожидании проверки вашей работы на занятии. '
 )
 
+requirements_5_md_url = 'https://raw.githubusercontent.com/YuriSilenok/AI/refs/heads/main/requirements_5.md'
+requirements_4_md_url = 'https://raw.githubusercontent.com/YuriSilenok/AI/refs/heads/main/requirements_4.md'
+requirements_3_md_url = 'https://raw.githubusercontent.com/YuriSilenok/AI/refs/heads/main/requirements_3.md'
+
 
 def wait_element(xpath: str):
-        for _ in range(10):
+        for _ in range(20):
             try:
                 element = driver.find_element(By.XPATH, xpath)
                 # driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
@@ -33,6 +41,14 @@ def wait_element(xpath: str):
                 return element
             except:
                 print(f'Элемент не найден {xpath}')
+
+def get_content(url: str):
+    print(url)
+    driver.get(url)
+    time.sleep(delay)
+    content = driver.find_element(By.XPATH,  '//pre').text
+    if "404: Not Found" != content:
+        return content
 
 
 def send_promt(promts:tuple[str]):
@@ -78,8 +94,6 @@ def send_review(pr_url: str, text: str):
     time.sleep(delay*2)
 
 try:
-    driver.maximize_window()
-    driver.implicitly_wait(5)
     
     driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
     time.sleep(delay)
@@ -101,9 +115,13 @@ try:
 
     wait = 30
     while True:
-        
+        requirements_3_md = get_content(requirements_3_md_url)
+        requirements_4_md = get_content(requirements_4_md_url)
+        requirements_5_md = get_content(requirements_5_md_url)
+            
         driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
         time.sleep(delay)
+
 
         links = [pr_link.get_attribute("href") for pr_link in driver.find_elements(By.XPATH, '//a[@data-hovercard-type="pull_request"]')]
         for pr_url in links:
@@ -125,99 +143,81 @@ try:
                 repo_url_models_py = f'{repo}/{folder}/models.py'
                 repo_url_service_py = f'{repo}/{folder}/service.py'
                 repo_url_client_py = f'{repo}/{folder}/client.py'
-                doc_md = None
-                models_py = None
-                service_py = None
-                client_py = None
+                doc_md = get_content(repo_url_doc_md)
+                models_py = get_content(repo_url_models_py)
+                service_py = get_content(repo_url_service_py)
+                client_py = get_content(repo_url_client_py)
                 review = start_message
 
                 # проверка doc.md
-                try:
-                    driver.find_element(By.XPATH, '//a[.="doc.md"]')
-
-                    print(repo_url_doc_md)
-                    driver.get(repo_url_doc_md)
-                    time.sleep(delay)
-                    doc_md = driver.find_element(By.XPATH,  '//pre').text
-                    promt = ''
-                    with open(file='promt.txt', mode='r', encoding='utf-8') as f:
-                        promt = ''.join(f.readlines())
-                    promt += doc_md
-                    review += f'\n\n---\n\n# Проверка doc.md\n\n{send_promt((promt,))}'
-                except Exception as ex:
-                    print(traceback.format_exc())
-                    review += "\n\n---\n\nфайл doc.md не найден"
-                            
-                print(review)
-
-                # проверка models.py
                 if doc_md:
                     try:
-                        driver.get(pr_url)
-                        time.sleep(delay)
-                        wait_element('//a[@id="prs-files-anchor-tab"]').click()
-                        driver.find_element(By.XPATH, '//a[.="models.py"]')
-
-                        print(repo_url_models_py)
-                        driver.get(repo_url_models_py)
-                        time.sleep(delay)
-                        models_py = driver.find_element(By.XPATH,  '//pre').text
-                        promt = f'Проверь соотвесвие реализации models.py по требованиям из doc.md\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}\n\nЕсли есть замечания, коротко напиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
-                        review += f'\n\n---\n\n# Проверка models.py\n\n{send_promt((promt,))}'
+                        promt = (
+                            f'Прочитай требования на оценку 3\n\n{requirements_3_md}'
+                            '\n\nНиже представлен текст файла `doc.md`, проверь его на соответсвия требованиям. '
+                            '\nЕсли есть замечания, коротко напиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
+                            f'\n\n{doc_md}'
+                        ),
+                        review += f'\n\n---\n\n# Проверка doc.md\n\n{send_promt(promt)}'
                     except Exception as ex:
-                        print(traceback.format_exc())
-                        review += "\n\n---\n\nфайл models.py не найден"
+                        review += f"\n\n---\n\nОшибка при проверке `doc.md`\n\n{traceback.format_exc()}"
+                else:
+                    review += f"\n\n---\n\nФайл `doc.md` не найден"
+                        
 
-                    print(review)
-
-                # проверка service.py
+                # проверка models.py
                 if doc_md and models_py:
                     try:
-                        driver.get(pr_url)
-                        time.sleep(delay)
-                        wait_element('//a[@id="prs-files-anchor-tab"]').click()
-
-                        driver.find_element(By.XPATH, '//a[.="service.py"]')
-                        print(repo_url_service_py)
-                        driver.get(repo_url_service_py)
-                        time.sleep(delay)
-                        service_py = driver.find_element(By.XPATH,  '//pre').text
-                        promt = f'Проверь соотвесвие реализации service.py по требованиям из doc.md с учётом models.py\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}\n\nФайл `service.py`\n\n{service_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
-                        result = send_promt((
-                            f'Прочитай и запомни два этих файла:\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}',
-                            f'Проверь соотвесвие реализации service.py по требованиям из doc.md с учётом models.py\n\nФайл `service.py`\n\n{service_py}\n\nЕсли есть замечания, коротко опиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
-                        ))
-                        review += f'\n\n---\n\n# Проверка service.py\n\n{result}'
+                        promt = (
+                            f'Прочитай требования на оценку 3\n\n{requirements_3_md}\n\n и документацию в файле `doc.md`\n\n{doc_md}'
+                            '\n\nНиже представлен текст файла `models.py`, проверь его на соответсвия требованиям  и `doc.md`. '
+                            '\nЕсли есть замечания, коротко напиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
+                            f'\n\nФайл `models.py`\n\n```\n{models_py}\n```'
+                        ),
+                        review += f'\n\n---\n\n# Проверка models.py\n\n{send_promt(promt)}'
                     except Exception as ex:
-                        print(traceback.format_exc())
-                        review += "\n\n---\n\nфайл service.py не найден"
+                        review += f"\n\n---\n\nОшибка при проверке `models.py`\n\n{traceback.format_exc()}"
+                else:
+                    review += f"\n\n---\n\nФайл `models.py` не найден"
 
 
-                    print(review)
-
-                # проверка client.py
+                # проверка service.py
                 if doc_md and models_py and service_py:
                     try:
-
-                        driver.get(pr_url)
-                        time.sleep(delay)
-                        wait_element('//a[@id="prs-files-anchor-tab"]').click()
-
-                        driver.find_element(By.XPATH, '//a[.="client.py"]')
-                        print(repo_url_service_py)
-                        driver.get(repo_url_service_py)
-                        time.sleep(delay)
-                        client_py = driver.find_element(By.XPATH,  '//pre').text
-                        result = send_promt((
-                            f'Прочитай и запомни два этих файла:\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `service.py`\n\n{service_py}',
-                            f'Проверь соотвесвие реализации client.py по требованиям из doc.md с учётом service.py\n\nФайл `client.py`\n\n{client_py}\n\nЕсли есть замечания, коротко опиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
-                        ))
-                        review += f'\n\n---\n\n# Проверка client.py\n\n{result}'
+                        promt = (
+                            f'Прочитай требования на оценку 4\n\n{requirements_4_md}\n\n'
+                            f'и документацию в файле `doc.md`\n\n{doc_md}\n\nи файл `models.py`\n\n```\n{models_py}\n```'
+                            '\n\nНиже представлен текст файла `service.py`, проверь его на соответсвия требованиям, `doc.md`,  `models.py`.'
+                            '\nЕсли есть замечания, коротко напиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
+                            f'\n\nФайл `service.py`\n\n```\n{service_py}\n```'
+                        ),
+                        review += f'\n\n---\n\n# Проверка service.py\n\n{send_promt(promt)}'
                     except Exception as ex:
-                        print(traceback.format_exc())
-                        review += "\n\n---\n\nфайл client.py не найден"
-                    print(review)
+                        review += f"\n\n---\n\nОшибка при проверке `service.py`\n\n{traceback.format_exc()}"
+                else:
+                    review += f"\n\n---\n\nФайл `service.py` не найден"
+            
 
+                # проверка client.py
+                if doc_md and models_py and service_py and client_py:
+                    try:
+                        promt = (
+                            f'Прочитай требования на оценку 5\n\n{requirements_5_md}\n\n'
+                            f'и документацию в файле `doc.md`\n\n{doc_md}\n\nи файл `service.py`\n\n```\n{service_py}\n```'
+                            '\n\nНиже представлен текст файла `client.py`, проверь его на соответсвия требованиям, `doc.md`,  `service.py`.'
+                            '\nЕсли есть замечания, коротко напиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
+                            f'\n\nФайл `client.py`\n\n```\n{client_py}\n```'
+                        ),
+                        review += f'\n\n---\n\n# Проверка client.py\n\n{send_promt(promt)}'
+                    except Exception as ex:
+                        review += f"\n\n---\n\nОшибка при проверке `client.py`\n\n{traceback.format_exc()}"
+                else:
+                    review += f"\n\n---\n\nФайл `client.py` не найден"
+
+
+
+
+                print(review)
                 send_review(pr_url, review)
 
 
