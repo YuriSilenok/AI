@@ -64,11 +64,14 @@ def send_review(pr_url: str, text: str):
     time.sleep(delay)
     driver.find_element(By.XPATH, '//a[@id="prs-files-anchor-tab"]').click()
     driver.find_element(By.XPATH, '//button[.//span[contains(., "Submit")]]').click()
-    pyperclip.copy(text)
+    driver.find_element(By.XPATH, '//label[span[.="Request changes"]]').click()
     comment = driver.find_element(By.XPATH, '//textarea[@placeholder="Leave a comment"]')
     comment.click()
+    comment.send_keys(Keys.CONTROL + 'a')
+    comment.send_keys(Keys.BACKSPACE)
+    pyperclip.copy(text)
     comment.send_keys(Keys.CONTROL + 'v')
-
+    time.sleep(delay)
     driver.find_element(By.XPATH, '(//div[button[.//span[.="Cancel"]]]//button)[2]').click()
     wait_element('//button[@data-comment-text="Close with comment"]')
     print('Проверка отправлена')
@@ -76,7 +79,7 @@ def send_review(pr_url: str, text: str):
 
 try:
     driver.maximize_window()
-    driver.implicitly_wait(30)
+    driver.implicitly_wait(5)
     
     driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
     time.sleep(delay)
@@ -103,8 +106,7 @@ try:
         time.sleep(delay)
 
         links = [pr_link.get_attribute("href") for pr_link in driver.find_elements(By.XPATH, '//a[@data-hovercard-type="pull_request"]')]
-        if links:
-            pr_url = links[0]
+        for pr_url in links:
             wait //= 2
 
             try:
@@ -160,7 +162,7 @@ try:
                         driver.get(repo_url_models_py)
                         time.sleep(delay)
                         models_py = driver.find_element(By.XPATH,  '//pre').text
-                        promt = f'Проверь соотвесвие реализации models.py по требованиям из doc.md\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}\n\nЕсли есть замечания, коротко напиши их, если замечаний нет, напиши "Замечаний нет"'
+                        promt = f'Проверь соотвесвие реализации models.py по требованиям из doc.md\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}\n\nЕсли есть замечания, коротко напиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
                         review += f'\n\n---\n\n# Проверка models.py\n\n{send_promt((promt,))}'
                     except Exception as ex:
                         print(traceback.format_exc())
@@ -183,7 +185,7 @@ try:
                         promt = f'Проверь соотвесвие реализации service.py по требованиям из doc.md с учётом models.py\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}\n\nФайл `service.py`\n\n{service_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
                         result = send_promt((
                             f'Прочитай и запомни два этих файла:\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `models.py`\n\n{models_py}',
-                            f'Проверь соотвесвие реализации service.py по требованиям из doc.md с учётом models.py\n\nФайл `service.py`\n\n{service_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
+                            f'Проверь соотвесвие реализации service.py по требованиям из doc.md с учётом models.py\n\nФайл `service.py`\n\n{service_py}\n\nЕсли есть замечания, коротко опиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
                         ))
                         review += f'\n\n---\n\n# Проверка service.py\n\n{result}'
                     except Exception as ex:
@@ -208,7 +210,7 @@ try:
                         client_py = driver.find_element(By.XPATH,  '//pre').text
                         result = send_promt((
                             f'Прочитай и запомни два этих файла:\n\nФайл `doc.md`\n\n{doc_md}\n\nФайл `service.py`\n\n{service_py}',
-                            f'Проверь соотвесвие реализации client.py по требованиям из doc.md с учётом service.py\n\nФайл `client.py`\n\n{client_py}\n\nЕсли есть замечания, коротко опиши их, если замечаний нет, напиши "Замечаний нет"'
+                            f'Проверь соотвесвие реализации client.py по требованиям из doc.md с учётом service.py\n\nФайл `client.py`\n\n{client_py}\n\nЕсли есть замечания, коротко опиши их без рекомендаций, если замечаний нет, напиши "Замечаний нет"'
                         ))
                         review += f'\n\n---\n\n# Проверка client.py\n\n{result}'
                     except Exception as ex:
