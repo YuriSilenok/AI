@@ -58,9 +58,10 @@ erDiagram
         int request_id FK
         int candidate_teacher_id FK
     }
-    REPLACEMENT_REQUEST ||--o{ REPLACEMENT_TEACHER_CANDIDATE : ""
-    REPLACEMENT_REQUEST }o--|| ORIGINAL_TEACHER : ""
-    REPLACEMENT_REQUEST }o--|| DISCIPLINE : ""
+
+    REPLACEMENT_REQUEST ||--o{ REPLACEMENT_TEACHER_CANDIDATE : "id → request_id"
+    REPLACEMENT_REQUEST }o--|| ORIGINAL_TEACHER : "original_teacher_id → id"
+    REPLACEMENT_REQUEST }o--|| DISCIPLINE : "discipline_id → id"
 ```
 
 ## Описание API в doc.md
