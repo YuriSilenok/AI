@@ -155,7 +155,6 @@ def list_entities(name: Optional[str] = Query(None)):
 - ✅ Полное REST API на FastAPI
 - ✅ Валидация через Pydantic
 - ✅ Логика работы с БД на Peewee
-- ✅ Обработка ошибок
 - ✅ Эндпоинты: CRUD + список с фильтрацией
 - ❌ Без UI (это оценка 5)
 - ❌ Без инициализации БД (это оценка 3/models.py)
