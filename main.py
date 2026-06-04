@@ -58,11 +58,10 @@ def send_promt(promts:tuple[str]):
     for promt in promts:
         textarea = wait_element('//textarea')
         textarea.click()
-        # print(f"\n\n{promt}\n\n")
         pyperclip.copy(promt)
         textarea.send_keys(Keys.CONTROL + 'v')
+        time.sleep(delay)
         textarea.send_keys(Keys.ENTER)
-        print('Промт отправлен')
         time.sleep(delay)
         # wait_element('//button[@id="call-button"]')
         wait_element('//button[@id="oknyx-button" and @aria-label="Алиса, начни слушать"]')
@@ -115,15 +114,18 @@ try:
 
     wait = 30
     while True:
-        requirements_3_md = get_content(requirements_3_md_url)
-        requirements_4_md = get_content(requirements_4_md_url)
-        requirements_5_md = get_content(requirements_5_md_url)
             
         driver.get("https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3AYuriSilenok+archived%3Afalse+sort%3Aupdated-asc")
         time.sleep(delay)
 
 
         links = [pr_link.get_attribute("href") for pr_link in driver.find_elements(By.XPATH, '//a[@data-hovercard-type="pull_request"]')]
+
+        if links:
+            requirements_3_md = get_content(requirements_3_md_url)
+            requirements_4_md = get_content(requirements_4_md_url)
+            requirements_5_md = get_content(requirements_5_md_url)
+
         for pr_url in links:
             wait //= 2
 
@@ -224,9 +226,9 @@ try:
             except Exception as ex:
                 print(pr_url, '\n', traceback.format_exc())
 
-        wait += 10
         print('wait', wait)
         time.sleep(wait)
+        wait += 2
     
 finally:
     driver.quit()
