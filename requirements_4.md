@@ -13,7 +13,7 @@
 
 ### 1. Импорты
 ```python
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import peewee
@@ -90,12 +90,6 @@ class EntityCreate(BaseModel):
 - Обновление: `entity.save()`
 - Удаление: `entity.is_active = False; entity.save()`
 
-### 8. Обработка ошибок
-- `HTTPException` с кодами:
-  - `404` — не найдено
-  - `400` — ошибка валидации
-  - `409` — конфликт (уже существует)
-
 ---
 
 ## 🔹 Чего НЕ должно быть в `service.py` (оценка 3)
@@ -112,7 +106,7 @@ class EntityCreate(BaseModel):
 ```python
 # service.py
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from models import Entity, db  # если models.py существует
